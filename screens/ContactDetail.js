@@ -10,15 +10,13 @@ class TabTwoScreen extends React.Component {
 	constructor(props) {
 		super(props);
 		let item = this.props.route.params.ContactDetail;
-
+		this.action = this.props.route.params.action;
 		this.state = {
 			Detail: { ...item },
 		};
 	}
 
 	componentDidMount() {
-		// this.setState({ Detail: this.ContactDetail });
-
 		this.props.navigation.setOptions({
 			headerTitle: "",
 			headerLeft: () => (
@@ -30,33 +28,33 @@ class TabTwoScreen extends React.Component {
 						opacity: pressed ? 0.5 : 1,
 					})}
 				>
-					<Text style={{ color: Colors.light.tint }}>Cancel</Text>
+					<Text style={{ color: Colors.light.tint }}>{this.action === "view" ? "Back" : "Cancel"}</Text>
 				</Pressable>
 			),
-			headerRight: () => (
-				<Pressable
-					onPress={() => {
-						if (this.state.Detail.firstName !== "") {
-							if (this.state.Detail.lastName !== "") {
-								this.props.route.params.onSave(this.state.Detail);
-								Alert.alert("", "Saved successfully");
-								this.props.navigation.goBack();
+			headerRight: () =>
+				this.action !== "view" ? (
+					<Pressable
+						onPress={() => {
+							if (this.state.Detail.firstName !== "") {
+								if (this.state.Detail.lastName !== "") {
+									this.props.route.params.onSave(this.state.Detail, this.action);
+									this.props.navigation.goBack();
+								} else {
+									Alert.alert("Alert", "Last Name cannot be blank.");
+									this.lastTextInput.focus();
+								}
 							} else {
-								Alert.alert("Alert", "Last Name cannot be blank.");
-								this.lastTextInput.focus();
+								Alert.alert("Alert", "First Name cannot be blank.");
+								this.firstTextInput.focus();
 							}
-						} else {
-							Alert.alert("Alert", "First Name cannot be blank.");
-							this.firstTextInput.focus();
-						}
-					}}
-					style={({ pressed }) => ({
-						opacity: pressed ? 0.5 : 1,
-					})}
-				>
-					<Text style={{ color: Colors.light.tint }}>Save</Text>
-				</Pressable>
-			),
+						}}
+						style={({ pressed }) => ({
+							opacity: pressed ? 0.5 : 1,
+						})}
+					>
+						<Text style={{ color: Colors.light.tint }}>Save</Text>
+					</Pressable>
+				) : null,
 		});
 	}
 
@@ -75,6 +73,7 @@ class TabTwoScreen extends React.Component {
 					<View style={styles.informationContainer}>
 						<Text style={styles.subTitle}>First Name</Text>
 						<TextInput
+							editable={this.action === "view" ? false : true}
 							ref={(input) => {
 								this.firstTextInput = input;
 							}}
@@ -93,6 +92,7 @@ class TabTwoScreen extends React.Component {
 					<View style={styles.informationContainer}>
 						<Text style={styles.subTitle}>Last Name</Text>
 						<TextInput
+							editable={this.action === "view" ? false : true}
 							ref={(input) => {
 								this.lastTextInput = input;
 							}}
@@ -111,6 +111,7 @@ class TabTwoScreen extends React.Component {
 					<View style={styles.informationContainer}>
 						<Text style={styles.subTitle}>Email</Text>
 						<TextInput
+							editable={this.action === "view" ? false : true}
 							ref={(input) => {
 								this.emailTextInput = input;
 							}}
@@ -129,6 +130,7 @@ class TabTwoScreen extends React.Component {
 					<View style={styles.informationContainer}>
 						<Text style={styles.subTitle}>Phone</Text>
 						<TextInput
+							editable={this.action === "view" ? false : true}
 							ref={(input) => {
 								this.phoneTextInput = input;
 							}}

@@ -1,8 +1,7 @@
 import React, { Component } from "react";
-import { StyleSheet, FlatList, TouchableOpacity, RefreshControl, Pressable } from "react-native";
+import { StyleSheet, FlatList, TouchableOpacity, RefreshControl, Pressable, Alert } from "react-native";
 import { Text, View } from "../components/Themed";
 import ContactListJSON from "../assets/data.json";
-import originData from "../assets/orginalData.json";
 import { FontAwesome } from "@expo/vector-icons";
 import Colors from "../constants/Colors";
 
@@ -26,7 +25,7 @@ class TabOneScreen extends Component {
 			tabBarIcon: ({ color }) => <TabBarIcon name='code' color={color} />,
 			headerLeft: () => (
 				<Pressable
-					// onPress={() => navigation.navigate("Modal")}
+					onPress={() => this.props.navigation.navigate("SearchScreen", { ContactList: this.state.ContactList })}
 					style={({ pressed }) => ({
 						opacity: pressed ? 0.5 : 1,
 					})}
@@ -36,7 +35,7 @@ class TabOneScreen extends Component {
 			),
 			headerRight: () => (
 				<Pressable
-					// onPress={() => navigation.navigate("Modal")}
+					onPress={() => this.props.navigation.navigate("ContactDetail", { ContactDetail: { firstName: "", lastName: "", email: "", phone: "" }, onSave: this.onSave, action: "create" })}
 					style={({ pressed }) => ({
 						opacity: pressed ? 0.5 : 1,
 					})}
@@ -54,16 +53,26 @@ class TabOneScreen extends Component {
 	}
 
 	editContact(item) {
-		this.props.navigation.navigate("TabTwo", { ContactDetail: item, onSave: this.onSave });
+		this.props.navigation.navigate("ContactDetail", { ContactDetail: item, onSave: this.onSave, action: "edit" });
 	}
 
-	onSave(data) {
+	onSave(data, action) {
 		this.setState({ isLoading: true });
-		let ContactList = [...this.state.ContactList];
-		let index = ContactList.findIndex((el) => el.id === data.id);
-		ContactList[index] = data;
+		if (action === "edit") {
+			let ContactList = [...this.state.ContactList];
+			let index = ContactList.findIndex((el) => el.id === data.id);
+			ContactList[index] = data;
 
-		this.setState({ isLoading: false, ContactList });
+			this.setState({ isLoading: false, ContactList }, () => {
+				Alert.alert("", "Edit successfully.");
+			});
+		} else {
+			let ContactList = [...this.state.ContactList];
+			data["id"] = this.guidGenerator();
+			this.setState({ isLoading: false, ContactList: [...ContactList, data] }, () => {
+				Alert.alert("", "Create successfully.");
+			});
+		}
 	}
 
 	refreshData() {
@@ -75,6 +84,13 @@ class TabOneScreen extends Component {
 				{this.state.isLoading ? null : <Text style={{ textAlign: "center", fontSize: 30, color: "gray", alignContent: "center", justifyContent: "center", flex: 1 }}>No Data Show</Text>}
 			</View>
 		);
+	}
+
+	guidGenerator() {
+		var S4 = function () {
+			return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+		};
+		return S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4();
 	}
 
 	render() {
